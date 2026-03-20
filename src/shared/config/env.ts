@@ -24,4 +24,6 @@ export function getEnvVariable(key: string): EnvValue {
 
 export const env = {
   DATABASE_URL: getEnvVariable("DATABASE_URL"),
+  JWT_SECRET: getEnvVariable("JWT_SECRET"),
+  JWT_EXPIRES_IN: getEnvVariable("JWT_EXPIRES_IN"),
 } as const;

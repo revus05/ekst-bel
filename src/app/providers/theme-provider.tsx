@@ -3,18 +3,31 @@
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import * as React from "react";
 
+import { useAppDispatch } from "shared/lib/store/hooks";
+import {
+  THEME_COOKIE_MAX_AGE,
+  THEME_COOKIE_NAME,
+  type ThemeMode,
+} from "shared/lib/theme/constants";
+import { setTheme } from "shared/model/theme/theme-slice";
+
 function ThemeProvider({
   children,
+  defaultTheme = "light",
   ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
+}: React.ComponentProps<typeof NextThemesProvider> & {
+  defaultTheme?: ThemeMode;
+}) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme={defaultTheme}
+      enableSystem={false}
+      storageKey={THEME_COOKIE_NAME}
       disableTransitionOnChange
       {...props}
     >
+      <ThemeSync />
       <ThemeHotkey />
       {children}
     </NextThemesProvider>
@@ -32,6 +45,23 @@ function isTypingTarget(target: EventTarget | null) {
     target.tagName === "TEXTAREA" ||
     target.tagName === "SELECT"
   );
+}
+
+function ThemeSync() {
+  const dispatch = useAppDispatch();
+  const { resolvedTheme } = useTheme();
+
+  React.useEffect(() => {
+    if (resolvedTheme !== "dark" && resolvedTheme !== "light") {
+      return;
+    }
+
+    dispatch(setTheme(resolvedTheme));
+    // biome-ignore lint/suspicious/noDocumentCookie: theme cookie is required for server-side preloaded theme and FOUC prevention
+    document.cookie = `${THEME_COOKIE_NAME}=${resolvedTheme}; path=/; max-age=${THEME_COOKIE_MAX_AGE}; samesite=lax`;
+  }, [dispatch, resolvedTheme]);
+
+  return null;
 }
 
 function ThemeHotkey() {

@@ -1,0 +1,5 @@
+const AUTH_COOKIE_NAME = "auth_token";
+const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+const AUTH_COOKIE_PATH = "/";
+
+export { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, AUTH_COOKIE_PATH };
