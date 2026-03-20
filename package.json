@@ -9,9 +9,14 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "bun run prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
@@ -31,6 +36,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "postcss": "^8",
+    "prisma": "^6.7.0",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
   }

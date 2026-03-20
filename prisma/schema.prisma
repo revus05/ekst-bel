@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum FeedbackType {
+  BUG
+  ERROR
+  UI_UX
+  FEATURE_REQUEST
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+model User {
+  id         String     @id @default(cuid())
+  email      String     @unique
+  password   String
+  name       String
+  feedbacks  Feedback[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Product {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String
+  feedbacks   Feedback[]
+  createdAt   DateTime   @default(now())
+}
+
+model Feedback {
+  id          String         @id @default(cuid())
+  userId      String
+  productId   String
+  type        FeedbackType
+  title       String
+  description String
+  status      FeedbackStatus @default(OPEN)
+  createdAt   DateTime       @default(now())
+
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productId])
+  @@index([status])
+  @@index([type])
+}
