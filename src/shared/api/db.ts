@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-import { env } from "@/shared/config/env";
+import { env } from "shared/config/env";
 
 const globalForPrisma = globalThis as typeof globalThis & {
   prisma?: PrismaClient;
