@@ -1,35 +1,44 @@
 import { z } from "shared/lib/form";
+import { getMessages } from "shared/lib/i18n/messages";
+import type { AppLocale } from "shared/lib/locale/constants";
 
-const emailSchema = z
-  .string()
-  .trim()
-  .email("Введите корректный email.")
-  .transform((value) => value.toLowerCase());
+function createAuthSchemas(locale: AppLocale) {
+  const t = getMessages(locale);
 
-const passwordSchema = z
-  .string()
-  .min(8, "Пароль должен содержать минимум 8 символов.")
-  .max(100, "Пароль не должен превышать 100 символов.");
+  const emailSchema = z
+    .string()
+    .trim()
+    .email(t.validation.emailInvalid)
+    .transform((value) => value.toLowerCase());
 
-const nameSchema = z
-  .string()
-  .trim()
-  .min(2, "Имя должно содержать минимум 2 символа.")
-  .max(50, "Имя не должно превышать 50 символов.");
+  const passwordSchema = z
+    .string()
+    .min(8, t.validation.passwordMin8)
+    .max(100, t.validation.passwordMax100);
 
-const loginSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-});
+  const nameSchema = z
+    .string()
+    .trim()
+    .min(2, t.validation.nameMin2)
+    .max(50, t.validation.nameMax50);
 
-const registerSchema = z.object({
-  name: nameSchema,
-  email: emailSchema,
-  password: passwordSchema,
-});
+  return {
+    loginSchema: z.object({
+      email: emailSchema,
+      password: passwordSchema,
+    }),
+    registerSchema: z.object({
+      name: nameSchema,
+      email: emailSchema,
+      password: passwordSchema,
+    }),
+  };
+}
+
+const { loginSchema, registerSchema } = createAuthSchemas("ru");
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export type { LoginFormValues, RegisterFormValues };
-export { loginSchema, registerSchema };
+export { createAuthSchemas, loginSchema, registerSchema };

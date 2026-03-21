@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { serializeProduct } from "entities/product/model/serialize-product";
-import { addProductSchema } from "features/add-product";
+import { createAddProductSchema } from "features/add-product/model/schemas";
+import { cookies } from "next/headers";
 import { db } from "shared/api/db";
 import {
   createErrorResponse,
@@ -9,8 +10,13 @@ import {
 import { getCurrentUser } from "shared/lib/auth/get-current-user";
 import { isAdmin } from "shared/lib/auth/guards";
 import { uploadImageToCloudinary } from "shared/lib/cloudinary";
+import { getMessages } from "shared/lib/i18n/messages";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 
 async function GET() {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
+
   try {
     const products = await db.product.findMany({
       orderBy: [
@@ -39,12 +45,16 @@ async function GET() {
     return createErrorResponse(
       500,
       "INTERNAL_SERVER_ERROR",
-      "Не удалось получить список продуктов. Попробуйте еще раз.",
+      t.routeErrors.internalGetProducts,
     );
   }
 }
 
 async function POST(request: Request) {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
+  const { addProductSchema } = createAddProductSchema(locale);
+
   try {
     const currentUser = await getCurrentUser();
 
@@ -52,16 +62,12 @@ async function POST(request: Request) {
       return createErrorResponse(
         401,
         "UNAUTHORIZED",
-        "Необходима авторизация.",
+        t.routeErrors.unauthorized,
       );
     }
 
     if (!isAdmin(currentUser)) {
-      return createErrorResponse(
-        403,
-        "FORBIDDEN",
-        "Только администратор может добавлять продукты.",
-      );
+      return createErrorResponse(403, "FORBIDDEN", t.routeErrors.adminOnly);
     }
 
     const formData = await request.formData();
@@ -80,7 +86,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "VALIDATION_ERROR",
-        "Проверьте корректность введенных данных.",
+        t.routeErrors.invalidData,
         {
           description: fieldErrors.description?.[0],
           image: fieldErrors.image?.[0],
@@ -93,9 +99,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "INVALID_IMAGE_TYPE",
-        "Нужно загрузить файл изображения.",
+        t.routeErrors.invalidImageType,
         {
-          image: "Нужно загрузить файл изображения.",
+          image: t.routeErrors.invalidImageType,
         },
       );
     }
@@ -104,9 +110,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "IMAGE_TOO_LARGE",
-        "Изображение не должно превышать 5 MB.",
+        t.routeErrors.imageTooLarge,
         {
-          image: "Изображение не должно превышать 5 MB.",
+          image: t.routeErrors.imageTooLarge,
         },
       );
     }
@@ -138,9 +144,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         409,
         "PRODUCT_ALREADY_EXISTS",
-        "Продукт с таким названием уже существует.",
+        t.routeErrors.productExists,
         {
-          name: "Продукт с таким названием уже существует.",
+          name: t.routeErrors.productExists,
         },
       );
     }
@@ -150,7 +156,7 @@ async function POST(request: Request) {
     return createErrorResponse(
       500,
       "INTERNAL_SERVER_ERROR",
-      "Не удалось добавить продукт. Проверьте Cloudinary и повторите попытку.",
+      t.routeErrors.internalAddProduct,
     );
   }
 }

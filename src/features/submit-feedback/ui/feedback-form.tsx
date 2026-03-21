@@ -1,21 +1,17 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { feedbackTypeOptions, submitFeedback } from "entities/feedback";
+import { useLocale } from "app/providers/locale-provider";
+import { getFeedbackTypeOptions, submitFeedback } from "entities/feedback";
 import { productsQueryOptions } from "entities/product";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { normalizeApiError } from "shared/api/contracts";
 import { useForm } from "shared/lib/form";
+import { getMessages } from "shared/lib/i18n/messages";
 import { toast } from "shared/lib/toast";
 import { Button } from "shared/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "shared/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "shared/ui/field";
 import { Form } from "shared/ui/form";
 import { Input } from "shared/ui/input";
 import {
@@ -27,7 +23,10 @@ import {
 } from "shared/ui/select";
 import { Textarea } from "shared/ui/textarea";
 
-import { type FeedbackFormValues, feedbackSchema } from "../model/schemas";
+import {
+  createFeedbackSchema,
+  type FeedbackFormValues,
+} from "../model/schemas";
 
 type FeedbackFormProps = {
   initialProductId?: string;
@@ -35,19 +34,22 @@ type FeedbackFormProps = {
 
 function FeedbackForm({ initialProductId }: FeedbackFormProps) {
   const router = useRouter();
+  const { locale } = useLocale();
+  const t = getMessages(locale);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const fields = ["productId", "type", "title", "description"] as const;
-  const {
-    data: products = [],
-    error,
-    isLoading: isProductsLoading,
-  } = useQuery(productsQueryOptions());
+  const feedbackSchema = React.useMemo(
+    () => createFeedbackSchema(locale),
+    [locale],
+  );
+  const feedbackTypeOptions = React.useMemo(
+    () => getFeedbackTypeOptions(locale),
+    [locale],
+  );
+  const { data: products = [], error } = useQuery(productsQueryOptions());
   const normalizedProductsError = React.useMemo(
-    () =>
-      error
-        ? normalizeApiError(error, "Не удалось загрузить список продуктов.")
-        : null,
-    [error],
+    () => (error ? normalizeApiError(error, t.productList.loadError) : null),
+    [error, t.productList.loadError],
   );
   const isProductsLoaded = products.length > 0;
 
@@ -86,7 +88,7 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
 
       try {
         await submitFeedback(value);
-        toast.success("Отзыв успешно отправлен.");
+        toast.success(t.feedback.success);
         formApi.reset();
         formApi.setFieldValue("productId", initialProductId ?? "");
         formApi.setFieldValue("type", "BUG");
@@ -94,7 +96,7 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
       } catch (error) {
         const normalizedError = normalizeApiError<keyof FeedbackFormValues>(
           error,
-          "Не удалось отправить отзыв.",
+          t.feedback.submitError,
         );
 
         setSubmitError(normalizedError.message);
@@ -120,11 +122,6 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
     },
   });
 
-  const isProductLocked = Boolean(
-    initialProductId &&
-      products.some((product) => product.id === initialProductId),
-  );
-
   return (
     <Form
       onSubmit={(event) => {
@@ -134,50 +131,6 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
       }}
     >
       <FieldGroup>
-        <form.Field name="productId">
-          {(field) => (
-            <Field>
-              <FieldLabel
-                htmlFor={field.name}
-                data-invalid={field.state.meta.errors.length > 0}
-              >
-                Продукт
-              </FieldLabel>
-              <Select
-                value={field.state.value}
-                disabled={isProductsLoading || isProductLocked}
-                onValueChange={(value) => field.handleChange(value)}
-              >
-                <SelectTrigger
-                  id={field.name}
-                  aria-invalid={field.state.meta.errors.length > 0}
-                >
-                  <SelectValue
-                    placeholder={
-                      isProductsLoading
-                        ? "Загрузка продуктов..."
-                        : "Выберите продукт"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {isProductLocked ? (
-                <FieldDescription>
-                  Продукт выбран из адреса страницы и зафиксирован.
-                </FieldDescription>
-              ) : null}
-              <FieldError errors={field.state.meta.errors} />
-            </Field>
-          )}
-        </form.Field>
-
         <form.Field name="type">
           {(field) => (
             <Field>
@@ -185,7 +138,7 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
                 htmlFor={field.name}
                 data-invalid={field.state.meta.errors.length > 0}
               >
-                Тип обращения
+                {t.feedback.type}
               </FieldLabel>
               <Select
                 value={field.state.value}
@@ -197,7 +150,7 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
                   id={field.name}
                   aria-invalid={field.state.meta.errors.length > 0}
                 >
-                  <SelectValue placeholder="Выберите тип обращения" />
+                  <SelectValue placeholder={t.feedback.typePlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
                   {feedbackTypeOptions.map((option) => (
@@ -219,13 +172,13 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
                 htmlFor={field.name}
                 data-invalid={field.state.meta.errors.length > 0}
               >
-                Заголовок
+                {t.feedback.title}
               </FieldLabel>
               <Input
                 id={field.name}
                 name={field.name}
                 value={field.state.value}
-                placeholder="Кратко опишите проблему или предложение"
+                placeholder={t.feedback.titlePlaceholder}
                 aria-invalid={field.state.meta.errors.length > 0}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
@@ -242,14 +195,14 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
                 htmlFor={field.name}
                 data-invalid={field.state.meta.errors.length > 0}
               >
-                Подробное описание
+                {t.feedback.description}
               </FieldLabel>
               <Textarea
                 id={field.name}
                 name={field.name}
                 rows={6}
                 value={field.state.value}
-                placeholder="Опишите шаги воспроизведения, ожидаемое поведение и важные детали"
+                placeholder={t.feedback.descriptionPlaceholder}
                 aria-invalid={field.state.meta.errors.length > 0}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
@@ -272,7 +225,7 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
               type="submit"
               disabled={!canSubmit || isSubmitting || !isProductsLoaded}
             >
-              {isSubmitting ? "Отправка..." : "Отправить отзыв"}
+              {isSubmitting ? t.feedback.sending : t.feedback.send}
             </Button>
           </div>
         )}

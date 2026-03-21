@@ -42,7 +42,7 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
 
 function normalizeApiError<TField extends string = string>(
   error: unknown,
-  fallbackMessage = "Что-то пошло не так. Попробуйте еще раз.",
+  fallbackMessage = "Something went wrong. Please try again.",
 ): NormalizedApiError<TField> {
   if (error instanceof ApiClientError && isApiErrorResponse(error.payload)) {
     return {

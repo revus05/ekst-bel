@@ -5,8 +5,10 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { AppProviders } from "app/providers";
 import { getCurrentUserFromCookies } from "shared/lib/auth/get-current-user";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 import { getThemeFromCookies } from "shared/lib/theme/server";
 import { cn } from "shared/lib/utils";
+import { CosmicBackground } from "shared/ui/cosmic-background";
 
 const notoSans = Noto_Sans({
   subsets: ["latin"],
@@ -31,6 +33,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const theme = getThemeFromCookies(cookieStore);
+  const locale = getLocaleFromCookies(cookieStore);
   const user = await getCurrentUserFromCookies(cookieStore);
 
   return (
@@ -45,15 +48,19 @@ export default async function RootLayout({
         notoSans.variable,
       )}
     >
-      <body>
+      <body className="relative isolate min-h-svh bg-background text-foreground">
+        <div className="dark:block hidden">
+          <CosmicBackground />
+        </div>
         <AppProviders
+          defaultLocale={locale}
           defaultTheme={theme}
           preloadedState={{
             theme: { value: theme },
             user: { currentUser: user },
           }}
         >
-          {children}
+          <div className="relative min-h-svh">{children}</div>
         </AppProviders>
       </body>
     </html>

@@ -1,3 +1,6 @@
+import { getMessages } from "shared/lib/i18n/messages";
+import type { AppLocale } from "shared/lib/locale/constants";
+
 type FeedbackType = "BUG" | "ERROR" | "UI_UX" | "FEATURE_REQUEST";
 
 type FeedbackStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED";
@@ -24,24 +27,30 @@ type FeedbackResponse = {
   feedback: Feedback;
 };
 
-const feedbackTypeOptions: Array<{ label: string; value: FeedbackType }> = [
-  {
-    label: "Баг",
-    value: "BUG",
-  },
-  {
-    label: "Ошибка",
-    value: "ERROR",
-  },
-  {
-    label: "Нелогичность",
-    value: "UI_UX",
-  },
-  {
-    label: "Предложение",
-    value: "FEATURE_REQUEST",
-  },
-];
+function getFeedbackTypeOptions(locale: AppLocale) {
+  const t = getMessages(locale);
+
+  return [
+    {
+      label: t.feedbackType.BUG,
+      value: "BUG",
+    },
+    {
+      label: t.feedbackType.ERROR,
+      value: "ERROR",
+    },
+    {
+      label: t.feedbackType.UI_UX,
+      value: "UI_UX",
+    },
+    {
+      label: t.feedbackType.FEATURE_REQUEST,
+      value: "FEATURE_REQUEST",
+    },
+  ] satisfies Array<{ label: string; value: FeedbackType }>;
+}
+
+const feedbackTypeOptions = getFeedbackTypeOptions("ru");
 
 export type {
   CreateFeedbackPayload,
@@ -50,4 +59,4 @@ export type {
   FeedbackStatus,
   FeedbackType,
 };
-export { feedbackTypeOptions };
+export { feedbackTypeOptions, getFeedbackTypeOptions };

@@ -1,29 +1,46 @@
 import { z } from "shared/lib/form";
+import { getMessages } from "shared/lib/i18n/messages";
+import type { AppLocale } from "shared/lib/locale/constants";
 
-const productNameSchema = z
-  .string()
-  .trim()
-  .min(2, "Название должно содержать минимум 2 символа.")
-  .max(100, "Название не должно превышать 100 символов.");
+function createAddProductSchema(locale: AppLocale) {
+  const t = getMessages(locale);
 
-const productDescriptionSchema = z
-  .string()
-  .trim()
-  .min(20, "Описание должно содержать минимум 20 символов.")
-  .max(1000, "Описание не должно превышать 1000 символов.");
+  const productNameSchema = z
+    .string()
+    .trim()
+    .min(2, t.validation.productNameMin2)
+    .max(100, t.validation.productNameMax100);
 
-const productImageSchema = z.custom<File>(
-  (value) => value instanceof File && value.size > 0,
-  "Загрузите изображение продукта.",
-);
+  const productDescriptionSchema = z
+    .string()
+    .trim()
+    .max(1000, t.validation.descriptionMax1000);
 
-const addProductSchema = z.object({
-  name: productNameSchema,
-  description: productDescriptionSchema,
-  image: productImageSchema,
-});
+  const productImageSchema = z.custom<File>(
+    (value) => value instanceof File && value.size > 0,
+    t.validation.uploadProductImage,
+  );
+
+  return {
+    addProductSchema: z.object({
+      name: productNameSchema,
+      description: productDescriptionSchema,
+      image: productImageSchema,
+    }),
+    productDescriptionSchema,
+    productNameSchema,
+  };
+}
+
+const { addProductSchema, productDescriptionSchema, productNameSchema } =
+  createAddProductSchema("ru");
 
 type AddProductFormValues = z.infer<typeof addProductSchema>;
 
 export type { AddProductFormValues };
-export { addProductSchema, productDescriptionSchema, productNameSchema };
+export {
+  addProductSchema,
+  createAddProductSchema,
+  productDescriptionSchema,
+  productNameSchema,
+};

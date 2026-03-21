@@ -7,4 +7,7 @@ export type {
   FeedbackStatus,
   FeedbackType,
 } from "entities/feedback/model/types";
-export { feedbackTypeOptions } from "entities/feedback/model/types";
+export {
+  feedbackTypeOptions,
+  getFeedbackTypeOptions,
+} from "entities/feedback/model/types";

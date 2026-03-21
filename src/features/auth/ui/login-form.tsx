@@ -1,11 +1,13 @@
 "use client";
 
+import { useLocale } from "app/providers/locale-provider";
 import { loginUser } from "entities/user/api/auth-api";
 import { setUser } from "entities/user/model/user-slice";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { normalizeApiError } from "shared/api/contracts";
 import { useForm } from "shared/lib/form";
+import { getMessages } from "shared/lib/i18n/messages";
 import { useAppDispatch } from "shared/lib/store/hooks";
 import { toast } from "shared/lib/toast";
 import { Button } from "shared/ui/button";
@@ -13,13 +15,19 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "shared/ui/field";
 import { Form } from "shared/ui/form";
 import { Input } from "shared/ui/input";
 
-import { type LoginFormValues, loginSchema } from "../model/schemas";
+import { createAuthSchemas, type LoginFormValues } from "../model/schemas";
 
 function LoginForm() {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { locale } = useLocale();
+  const t = getMessages(locale);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const fields = ["email", "password"] as const;
+  const { loginSchema } = React.useMemo(
+    () => createAuthSchemas(locale),
+    [locale],
+  );
 
   function clearApiFieldErrors() {
     for (const fieldName of fields) {
@@ -50,13 +58,13 @@ function LoginForm() {
         const response = await loginUser(value);
 
         dispatch(setUser(response.user));
-        toast.success("Вы успешно вошли в аккаунт.");
+        toast.success(t.auth.loginSuccess);
         router.push("/");
         router.refresh();
       } catch (error) {
         const normalizedError = normalizeApiError<keyof LoginFormValues>(
           error,
-          "Не удалось выполнить вход.",
+          t.auth.loginError,
         );
 
         setSubmitError(normalizedError.message);
@@ -122,7 +130,7 @@ function LoginForm() {
                 htmlFor={field.name}
                 data-invalid={field.state.meta.errors.length > 0}
               >
-                Пароль
+                {t.auth.password}
               </FieldLabel>
               <Input
                 id={field.name}
@@ -147,7 +155,7 @@ function LoginForm() {
               <p className="text-destructive text-sm">{submitError}</p>
             ) : null}
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Вход..." : "Войти"}
+              {isSubmitting ? t.auth.loggingIn : t.auth.login}
             </Button>
           </div>
         )}

@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { serializeUser } from "entities/user/model/serialize-user";
-import { registerSchema } from "features/auth/model/schemas";
+import { createAuthSchemas } from "features/auth/model/schemas";
+import { cookies } from "next/headers";
 import { db } from "shared/api/db";
 import {
   createErrorResponse,
@@ -9,8 +10,14 @@ import {
 import { signAuthToken } from "shared/lib/auth/jwt";
 import { hashPassword } from "shared/lib/auth/password";
 import { setAuthCookie } from "shared/lib/auth/session";
+import { getMessages } from "shared/lib/i18n/messages";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 
 async function POST(request: Request) {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
+  const { registerSchema } = createAuthSchemas(locale);
+
   try {
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);
@@ -21,7 +28,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "VALIDATION_ERROR",
-        "Проверьте корректность введенных данных.",
+        t.routeErrors.invalidData,
         {
           email: fieldErrors.email?.[0],
           name: fieldErrors.name?.[0],
@@ -39,9 +46,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         409,
         "EMAIL_ALREADY_EXISTS",
-        "Пользователь с таким email уже существует.",
+        t.routeErrors.emailExists,
         {
-          email: "Пользователь с таким email уже существует.",
+          email: t.routeErrors.emailExists,
         },
       );
     }
@@ -84,7 +91,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "INVALID_JSON",
-        "Не удалось прочитать тело запроса.",
+        t.routeErrors.invalidJson,
       );
     }
 
@@ -95,9 +102,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         409,
         "EMAIL_ALREADY_EXISTS",
-        "Пользователь с таким email уже существует.",
+        t.routeErrors.emailExists,
         {
-          email: "Пользователь с таким email уже существует.",
+          email: t.routeErrors.emailExists,
         },
       );
     }
@@ -107,7 +114,7 @@ async function POST(request: Request) {
     return createErrorResponse(
       500,
       "INTERNAL_SERVER_ERROR",
-      "Не удалось зарегистрировать пользователя. Попробуйте еще раз.",
+      t.routeErrors.internalRegister,
     );
   }
 }

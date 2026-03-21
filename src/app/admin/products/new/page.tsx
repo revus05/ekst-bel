@@ -1,7 +1,10 @@
 import { AddProductForm } from "features/add-product";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "shared/lib/auth/get-current-user";
 import { isAdmin } from "shared/lib/auth/guards";
+import { getMessages } from "shared/lib/i18n/messages";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 import {
   Card,
   CardContent,
@@ -12,6 +15,8 @@ import {
 import { Header } from "widgets/header";
 
 async function NewProductPage() {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -23,29 +28,25 @@ async function NewProductPage() {
   }
 
   return (
-    <div className="min-h-svh bg-background">
+    <div className="min-h-svh">
       <Header />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
         <section className="grid gap-2">
           <p className="text-muted-foreground text-sm font-medium uppercase tracking-[0.18em]">
-            Админка
+            {t.admin.section}
           </p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Добавление продукта
+            {t.admin.title}
           </h1>
           <p className="text-muted-foreground max-w-3xl text-sm leading-6 sm:text-base">
-            Создайте новый продукт компании и загрузите его обложку в
-            Cloudinary.
+            {t.admin.newProductDescription}
           </p>
         </section>
 
-        <Card className="max-w-3xl flex justify-center">
+        <Card className="max-w-3xl justify-center">
           <CardHeader>
-            <CardTitle>Новый продукт</CardTitle>
-            <CardDescription>
-              После создания продукт сразу появится на главной странице и станет
-              доступен для сбора обратной связи.
-            </CardDescription>
+            <CardTitle>{t.admin.newProductTitle}</CardTitle>
+            <CardDescription>{t.admin.newProductInfo}</CardDescription>
           </CardHeader>
           <CardContent>
             <AddProductForm />

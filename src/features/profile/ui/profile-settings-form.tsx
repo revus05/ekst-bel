@@ -1,10 +1,11 @@
 "use client";
 
 import { useLocale } from "app/providers/locale-provider";
-import { registerUser } from "entities/user/api/auth-api";
+import type { User } from "entities/user/model/types";
 import { setUser } from "entities/user/model/user-slice";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { apiClient } from "shared/api/api-client";
 import { normalizeApiError } from "shared/api/contracts";
 import { useForm } from "shared/lib/form";
 import { getMessages } from "shared/lib/i18n/messages";
@@ -15,17 +16,21 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "shared/ui/field";
 import { Form } from "shared/ui/form";
 import { Input } from "shared/ui/input";
 
-import { createAuthSchemas, type RegisterFormValues } from "../model/schemas";
+import { createProfileSchema, type ProfileFormValues } from "../model/schemas";
 
-function RegisterForm() {
+type ProfileSettingsFormProps = {
+  user: User;
+};
+
+function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { locale } = useLocale();
   const t = getMessages(locale);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
-  const fields = ["name", "email", "password"] as const;
-  const { registerSchema } = React.useMemo(
-    () => createAuthSchemas(locale),
+  const fields = ["name", "email"] as const;
+  const profileSchema = React.useMemo(
+    () => createProfileSchema(locale),
     [locale],
   );
 
@@ -43,32 +48,34 @@ function RegisterForm() {
 
   const form = useForm({
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    } as RegisterFormValues,
+      email: user.email,
+      name: user.name,
+    } as ProfileFormValues,
     validators: {
-      onBlur: registerSchema,
-      onSubmit: registerSchema,
+      onBlur: profileSchema,
+      onSubmit: profileSchema,
     },
     onSubmit: async ({ formApi, value }) => {
       clearApiFieldErrors();
       setSubmitError(null);
 
       try {
-        const response = await registerUser(value);
+        const payload = await apiClient.patch<
+          {
+            success: true;
+            data: {
+              user: User;
+            };
+          },
+          ProfileFormValues
+        >("/api/profile", value);
 
-        dispatch(setUser(response.user));
-        toast.success(t.auth.registerSuccess);
-        router.push("/");
+        dispatch(setUser(payload.data.user));
+        toast.success(t.profile.submitSuccess);
+        formApi.reset(payload.data.user);
         router.refresh();
       } catch (error) {
-        const normalizedError = normalizeApiError<keyof RegisterFormValues>(
-          error,
-          t.auth.registerError,
-        );
-
-        setSubmitError(normalizedError.message);
+        const normalizedError = normalizeApiError(error, t.profile.submitError);
 
         for (const fieldName of fields) {
           const fieldError = normalizedError.fieldErrors[fieldName];
@@ -86,6 +93,7 @@ function RegisterForm() {
           }));
         }
 
+        setSubmitError(normalizedError.message);
         toast.error(normalizedError.message);
       }
     },
@@ -112,7 +120,6 @@ function RegisterForm() {
               <Input
                 id={field.name}
                 name={field.name}
-                autoComplete="name"
                 value={field.state.value}
                 aria-invalid={field.state.meta.errors.length > 0}
                 onBlur={field.handleBlur}
@@ -136,31 +143,6 @@ function RegisterForm() {
                 id={field.name}
                 name={field.name}
                 type="email"
-                autoComplete="email"
-                value={field.state.value}
-                aria-invalid={field.state.meta.errors.length > 0}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-              />
-              <FieldError errors={field.state.meta.errors} />
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="password">
-          {(field) => (
-            <Field>
-              <FieldLabel
-                htmlFor={field.name}
-                data-invalid={field.state.meta.errors.length > 0}
-              >
-                {t.auth.password}
-              </FieldLabel>
-              <Input
-                id={field.name}
-                name={field.name}
-                type="password"
-                autoComplete="new-password"
                 value={field.state.value}
                 aria-invalid={field.state.meta.errors.length > 0}
                 onBlur={field.handleBlur}
@@ -172,14 +154,16 @@ function RegisterForm() {
         </form.Field>
       </FieldGroup>
 
-      <form.Subscribe selector={(state) => [state.isSubmitting]}>
-        {([isSubmitting]) => (
-          <div className="grid gap-3">
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+      >
+        {([canSubmit, isSubmitting]) => (
+          <div className="mt-6 grid gap-3">
             {submitError ? (
               <p className="text-destructive text-sm">{submitError}</p>
             ) : null}
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? t.auth.registering : t.auth.submitRegister}
+            <Button type="submit" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting ? t.profile.submitting : t.profile.submit}
             </Button>
           </div>
         )}
@@ -188,4 +172,4 @@ function RegisterForm() {
   );
 }
 
-export { RegisterForm };
+export { ProfileSettingsForm };

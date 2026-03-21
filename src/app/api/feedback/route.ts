@@ -1,24 +1,27 @@
 import { Prisma } from "@prisma/client";
 import { serializeFeedback } from "entities/feedback";
-import { feedbackSchema } from "features/submit-feedback/model/schemas";
+import { createFeedbackSchema } from "features/submit-feedback/model/schemas";
+import { cookies } from "next/headers";
 import { db } from "shared/api/db";
 import {
   createErrorResponse,
   createSuccessResponse,
 } from "shared/api/response";
 import { getCurrentUser } from "shared/lib/auth/get-current-user";
+import { getMessages } from "shared/lib/i18n/messages";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 import { sendFeedbackNotification } from "shared/lib/telegram/send-feedback-notification";
 
 async function POST(request: Request) {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
+  const feedbackSchema = createFeedbackSchema(locale);
+
   try {
     const currentUser = await getCurrentUser();
 
     if (!currentUser) {
-      return createErrorResponse(
-        401,
-        "UNAUTHORIZED",
-        "Необходимо войти в аккаунт для отправки отзыва.",
-      );
+      return createErrorResponse(401, "UNAUTHORIZED", t.feedback.unauthorized);
     }
 
     const body = await request.json();
@@ -30,7 +33,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "VALIDATION_ERROR",
-        "Проверьте корректность введенных данных.",
+        t.routeErrors.invalidData,
         {
           description: fieldErrors.description?.[0],
           productId: fieldErrors.productId?.[0],
@@ -54,9 +57,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         404,
         "PRODUCT_NOT_FOUND",
-        "Выбранный продукт не найден.",
+        t.routeErrors.productNotFound,
         {
-          productId: "Выбранный продукт не найден.",
+          productId: t.routeErrors.productNotFound,
         },
       );
     }
@@ -104,7 +107,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "INVALID_JSON",
-        "Не удалось прочитать тело запроса.",
+        t.routeErrors.invalidJson,
       );
     }
 
@@ -112,7 +115,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         500,
         "DATABASE_ERROR",
-        "Не удалось сохранить отзыв в базе данных.",
+        t.routeErrors.internalFeedback,
       );
     }
 
@@ -121,7 +124,7 @@ async function POST(request: Request) {
     return createErrorResponse(
       500,
       "INTERNAL_SERVER_ERROR",
-      "Не удалось отправить отзыв. Попробуйте еще раз.",
+      t.routeErrors.internalFeedback,
     );
   }
 }

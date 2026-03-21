@@ -1,12 +1,15 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocale } from "app/providers/locale-provider";
 import { createProduct, productsQueryOptions } from "entities/product";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { startTransition } from "react";
 import { normalizeApiError } from "shared/api/contracts";
 import { useForm } from "shared/lib/form";
+import { getMessages } from "shared/lib/i18n/messages";
 import { toast } from "shared/lib/toast";
 import { Button } from "shared/ui/button";
 import {
@@ -20,11 +23,16 @@ import { Form } from "shared/ui/form";
 import { Input } from "shared/ui/input";
 import { Textarea } from "shared/ui/textarea";
 
-import { type AddProductFormValues, addProductSchema } from "../model/schemas";
+import {
+  type AddProductFormValues,
+  createAddProductSchema,
+} from "../model/schemas";
 
 function AddProductForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { locale } = useLocale();
+  const t = getMessages(locale);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = React.useState<string | null>(
     null,
@@ -33,6 +41,10 @@ function AddProductForm() {
   const createProductMutation = useMutation({
     mutationFn: createProduct,
   });
+  const { addProductSchema } = React.useMemo(
+    () => createAddProductSchema(locale),
+    [locale],
+  );
 
   const form = useForm({
     defaultValues: {
@@ -53,15 +65,17 @@ function AddProductForm() {
         await queryClient.invalidateQueries({
           queryKey: productsQueryOptions().queryKey,
         });
-        toast.success("Продукт успешно добавлен.");
+        toast.success(t.addProductForm.success);
         setImagePreviewUrl(null);
         formApi.reset();
-        router.push("/");
-        router.refresh();
+        startTransition(() => {
+          router.replace("/");
+          router.refresh();
+        });
       } catch (error) {
         const normalizedError = normalizeApiError<keyof AddProductFormValues>(
           error,
-          "Не удалось добавить продукт.",
+          t.addProductForm.submitError,
         );
 
         setSubmitError(normalizedError.message);
@@ -123,14 +137,14 @@ function AddProductForm() {
                 htmlFor={field.name}
                 data-invalid={field.state.meta.errors.length > 0}
               >
-                Название продукта
+                {t.addProductForm.name}
               </FieldLabel>
               <Input
                 id={field.name}
                 name={field.name}
                 value={field.state.value}
                 aria-invalid={field.state.meta.errors.length > 0}
-                placeholder="Например, EKST Support Desk"
+                placeholder={t.addProductForm.namePlaceholder}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
@@ -146,7 +160,7 @@ function AddProductForm() {
                 htmlFor={field.name}
                 data-invalid={field.state.meta.errors.length > 0}
               >
-                Описание
+                {t.addProductForm.description}
               </FieldLabel>
               <Textarea
                 id={field.name}
@@ -154,7 +168,7 @@ function AddProductForm() {
                 rows={5}
                 value={field.state.value}
                 aria-invalid={field.state.meta.errors.length > 0}
-                placeholder="Кратко опишите, для чего нужен продукт и какую задачу он решает."
+                placeholder={t.addProductForm.descriptionPlaceholder}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
@@ -170,7 +184,7 @@ function AddProductForm() {
                 htmlFor={field.name}
                 data-invalid={field.state.meta.errors.length > 0}
               >
-                Изображение
+                {t.addProductForm.image}
               </FieldLabel>
               <Input
                 id={field.name}
@@ -195,14 +209,12 @@ function AddProductForm() {
                   field.handleChange(nextFile);
                 }}
               />
-              <FieldDescription>
-                Поддерживаются `PNG`, `JPG`, `JPEG`, `WEBP` до 5 MB.
-              </FieldDescription>
+              <FieldDescription>{t.addProductForm.imageHint}</FieldDescription>
               {imagePreviewUrl ? (
-                <div className="bg-muted relative max-w-sm overflow-hidden rounded-xl border">
+                <div className="glass-panel relative max-w-sm overflow-hidden rounded-[1.25rem]">
                   <Image
                     src={imagePreviewUrl}
-                    alt="Предпросмотр изображения продукта"
+                    alt={t.addProductForm.imageAlt}
                     unoptimized
                     width={640}
                     height={360}
@@ -223,7 +235,7 @@ function AddProductForm() {
               <p className="text-destructive text-sm">{submitError}</p>
             ) : null}
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Добавление..." : "Добавить продукт"}
+              {isSubmitting ? t.addProductForm.adding : t.addProductForm.add}
             </Button>
           </div>
         )}

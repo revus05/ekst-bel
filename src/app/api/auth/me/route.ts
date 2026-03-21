@@ -1,10 +1,16 @@
+import { cookies } from "next/headers";
 import {
   createErrorResponse,
   createSuccessResponse,
 } from "shared/api/response";
 import { getCurrentUser } from "shared/lib/auth/get-current-user";
+import { getMessages } from "shared/lib/i18n/messages";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 
 async function GET() {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
+
   try {
     const user = await getCurrentUser();
 
@@ -12,7 +18,7 @@ async function GET() {
       return createErrorResponse(
         401,
         "UNAUTHORIZED",
-        "Необходима авторизация.",
+        t.routeErrors.unauthorized,
       );
     }
 
@@ -23,7 +29,7 @@ async function GET() {
     return createErrorResponse(
       500,
       "INTERNAL_SERVER_ERROR",
-      "Не удалось получить текущего пользователя.",
+      t.routeErrors.internalMe,
     );
   }
 }

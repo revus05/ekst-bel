@@ -1,5 +1,6 @@
 import { serializeUser } from "entities/user/model/serialize-user";
-import { loginSchema } from "features/auth/model/schemas";
+import { createAuthSchemas } from "features/auth/model/schemas";
+import { cookies } from "next/headers";
 import { db } from "shared/api/db";
 import {
   createErrorResponse,
@@ -8,8 +9,14 @@ import {
 import { signAuthToken } from "shared/lib/auth/jwt";
 import { verifyPassword } from "shared/lib/auth/password";
 import { setAuthCookie } from "shared/lib/auth/session";
+import { getMessages } from "shared/lib/i18n/messages";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 
 async function POST(request: Request) {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
+  const { loginSchema } = createAuthSchemas(locale);
+
   try {
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
@@ -20,7 +27,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "VALIDATION_ERROR",
-        "Проверьте корректность введенных данных.",
+        t.routeErrors.invalidData,
         {
           email: fieldErrors.email?.[0],
           password: fieldErrors.password?.[0],
@@ -45,9 +52,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         401,
         "INVALID_CREDENTIALS",
-        "Неверный email или пароль.",
+        t.auth.invalidCredentials,
         {
-          password: "Неверный email или пароль.",
+          password: t.auth.invalidCredentials,
         },
       );
     }
@@ -61,9 +68,9 @@ async function POST(request: Request) {
       return createErrorResponse(
         401,
         "INVALID_CREDENTIALS",
-        "Неверный email или пароль.",
+        t.auth.invalidCredentials,
         {
-          password: "Неверный email или пароль.",
+          password: t.auth.invalidCredentials,
         },
       );
     }
@@ -87,7 +94,7 @@ async function POST(request: Request) {
       return createErrorResponse(
         400,
         "INVALID_JSON",
-        "Не удалось прочитать тело запроса.",
+        t.routeErrors.invalidJson,
       );
     }
 
@@ -96,7 +103,7 @@ async function POST(request: Request) {
     return createErrorResponse(
       500,
       "INTERNAL_SERVER_ERROR",
-      "Не удалось выполнить вход. Попробуйте еще раз.",
+      t.routeErrors.internalLogin,
     );
   }
 }

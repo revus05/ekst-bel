@@ -1,7 +1,10 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "shared/api/db";
 import { getCurrentUser } from "shared/lib/auth/get-current-user";
 import { isAdmin } from "shared/lib/auth/guards";
+import { getMessages } from "shared/lib/i18n/messages";
+import { getLocaleFromCookies } from "shared/lib/locale/server";
 import {
   Card,
   CardContent,
@@ -11,20 +14,9 @@ import {
 } from "shared/ui/card";
 import { Header } from "widgets/header";
 
-const feedbackTypeLabels = {
-  BUG: "Баг",
-  ERROR: "Ошибка",
-  UI_UX: "UI/UX",
-  FEATURE_REQUEST: "Предложение",
-} as const;
-
-const feedbackStatusLabels = {
-  OPEN: "Открыто",
-  IN_PROGRESS: "В работе",
-  RESOLVED: "Решено",
-} as const;
-
 async function AdminFeedbackPage() {
+  const locale = getLocaleFromCookies(await cookies());
+  const t = getMessages(locale);
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -61,18 +53,18 @@ async function AdminFeedbackPage() {
   });
 
   return (
-    <div className="min-h-svh bg-background">
+    <div className="min-h-svh">
       <Header />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
         <section className="grid gap-2">
           <p className="text-muted-foreground text-sm font-medium uppercase tracking-[0.18em]">
-            Админка
+            {t.admin.section}
           </p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Обращения пользователей
+            {t.admin.feedbackTitle}
           </h1>
           <p className="text-muted-foreground max-w-3xl text-sm leading-6 sm:text-base">
-            Полный список обращений с автором, продуктом и текущим статусом.
+            {t.admin.feedbackDescription}
           </p>
         </section>
 
@@ -92,7 +84,9 @@ async function AdminFeedbackPage() {
                     <div className="text-muted-foreground text-sm sm:text-right">
                       <p>{feedback.product.name}</p>
                       <p>
-                        {new Date(feedback.createdAt).toLocaleString("ru-RU")}
+                        {new Date(feedback.createdAt).toLocaleString(
+                          t.localeTag,
+                        )}
                       </p>
                     </div>
                   </div>
@@ -100,10 +94,10 @@ async function AdminFeedbackPage() {
                 <CardContent className="grid gap-4">
                   <div className="flex flex-wrap gap-2 text-sm">
                     <span className="rounded-full border px-3 py-1">
-                      {feedbackTypeLabels[feedback.type]}
+                      {t.feedbackType[feedback.type]}
                     </span>
                     <span className="rounded-full border px-3 py-1">
-                      {feedbackStatusLabels[feedback.status]}
+                      {t.feedbackStatus[feedback.status]}
                     </span>
                   </div>
 
@@ -116,11 +110,8 @@ async function AdminFeedbackPage() {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Обращений пока нет</CardTitle>
-                <CardDescription>
-                  Когда пользователи начнут оставлять обращения, они появятся
-                  здесь.
-                </CardDescription>
+                <CardTitle>{t.admin.empty}</CardTitle>
+                <CardDescription>{t.admin.emptyDescription}</CardDescription>
               </CardHeader>
             </Card>
           )}

@@ -17,9 +17,9 @@ type ProductCardProps = {
 
 function ProductCard({ product, action }: ProductCardProps) {
   return (
-    <Card className="h-full overflow-hidden">
+    <Card className="h-full overflow-hidden pt-0">
       {product.imageUrl ? (
-        <div className="bg-muted relative aspect-video overflow-hidden border-b">
+        <div className="bg-muted/30 relative aspect-video overflow-hidden border-b border-white/10">
           <Image
             src={product.imageUrl}
             alt={product.name}
