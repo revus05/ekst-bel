@@ -28,7 +28,7 @@ export function getEnvVariable(key: string): EnvValue {
 }
 
 export const env = {
-  DATABASE_URL: getEnvVariable("DATABASE_URL"),
+  STORAGE_PRISMA_DATABASE_URL: getEnvVariable("STORAGE_PRISMA_DATABASE_URL"),
   JWT_SECRET: getEnvVariable("JWT_SECRET"),
   JWT_EXPIRES_IN: getEnvVariable("JWT_EXPIRES_IN"),
   CLOUDINARY_CLOUD_NAME: getEnvVariable("CLOUDINARY_CLOUD_NAME"),

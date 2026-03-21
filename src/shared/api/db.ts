@@ -7,18 +7,18 @@ const globalForPrisma = globalThis as typeof globalThis & {
 };
 
 function createPrismaClient() {
-  if (!env.DATABASE_URL) {
+  if (!env.STORAGE_PRISMA_DATABASE_URL) {
     console.error(
-      "[db] Prisma client is starting without a valid DATABASE_URL.",
+      "[db] Prisma client is starting without a valid STORAGE_PRISMA_DATABASE_URL.",
     );
   }
 
   return new PrismaClient(
-    env.DATABASE_URL
+    env.STORAGE_PRISMA_DATABASE_URL
       ? {
           datasources: {
             db: {
-              url: env.DATABASE_URL,
+              url: env.STORAGE_PRISMA_DATABASE_URL,
             },
           },
         }
