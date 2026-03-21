@@ -47,16 +47,19 @@ async function POST(request: Request) {
     }
 
     const passwordHash = await hashPassword(parsed.data.password);
+    const usersCount = await db.user.count();
     const user = await db.user.create({
       data: {
         email: parsed.data.email,
         name: parsed.data.name,
         password: passwordHash,
+        role: usersCount === 0 ? "ADMIN" : "USER",
       },
       select: {
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -66,6 +69,7 @@ async function POST(request: Request) {
       sub: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
     });
 
     const response = createSuccessResponse({

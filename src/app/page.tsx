@@ -1,46 +1,38 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useAuth } from "features/auth/model/use-auth";
-import { useAppSelector } from "shared/lib/store/hooks";
-import { Button } from "shared/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "shared/ui/card";
+import { getCurrentUser } from "shared/lib/auth/get-current-user";
+import { Header } from "widgets/header";
+import { ProductList } from "widgets/product-list";
 
-function Page() {
-  const { logout, user } = useAuth();
-  const theme = useAppSelector((state) => state.theme.value);
+async function Page() {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) {
+    redirect("/login");
+  }
 
   return (
-    <main className="flex min-h-svh items-center justify-center p-6">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <CardTitle>Вы авторизованы</CardTitle>
-          <CardDescription>
-            Данные пользователя и тема были предзагружены на сервере и положены
-            в redux store.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 text-sm">
-          <div className="grid gap-1">
-            <span className="text-muted-foreground">Пользователь</span>
-            <span className="font-medium">{user?.name}</span>
-            <span>{user?.email}</span>
+    <div className="min-h-svh bg-background">
+      <Header />
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10">
+        <section className="grid gap-3">
+          <p className="text-muted-foreground text-sm font-medium uppercase tracking-[0.18em]">
+            Дашборд поддержки
+          </p>
+          <div className="grid gap-2">
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Здравствуйте, {currentUser.name}
+            </h1>
+            <p className="text-muted-foreground max-w-3xl text-sm leading-6 sm:text-base">
+              Выберите продукт компании и отправьте баг-репорт, описание ошибки,
+              сообщение о нелогичном поведении или предложение по улучшению.
+            </p>
           </div>
-          <div className="grid gap-1">
-            <span className="text-muted-foreground">Тема</span>
-            <span className="font-medium capitalize">{theme}</span>
-          </div>
-          <Button type="button" variant="outline" onClick={() => void logout()}>
-            Выйти
-          </Button>
-        </CardContent>
-      </Card>
-    </main>
+        </section>
+
+        <ProductList />
+      </main>
+    </div>
   );
 }
 

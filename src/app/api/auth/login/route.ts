@@ -34,6 +34,7 @@ async function POST(request: Request) {
         id: true,
         email: true,
         name: true,
+        role: true,
         password: true,
         createdAt: true,
         updatedAt: true,
@@ -71,6 +72,7 @@ async function POST(request: Request) {
       sub: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
     });
 
     const response = createSuccessResponse({

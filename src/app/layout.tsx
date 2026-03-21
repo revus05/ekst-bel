@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Geist_Mono, Noto_Sans } from "next/font/google";
 import { cookies } from "next/headers";
 
@@ -17,6 +18,12 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 });
 
+export const metadata: Metadata = {
+  title: "EKST Support",
+  description:
+    "Приложение клиентской поддержки для отправки отзывов, баг-репортов и предложений по продуктам компании.",
+};
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +35,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="en"
+      lang="ru"
       suppressHydrationWarning
       className={cn(
         "antialiased",

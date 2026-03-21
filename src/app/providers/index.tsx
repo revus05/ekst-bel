@@ -3,6 +3,7 @@
 import type { PreloadedStoreState } from "shared/lib/store/store";
 import { Toaster } from "shared/ui/toaster";
 
+import { QueryProvider } from "./query-provider";
 import { StoreProvider } from "./store-provider";
 import { ThemeProvider } from "./theme-provider";
 
@@ -17,10 +18,12 @@ function AppProviders({
 }>) {
   return (
     <StoreProvider preloadedState={preloadedState}>
-      <ThemeProvider defaultTheme={defaultTheme}>
-        {children}
-        <Toaster />
-      </ThemeProvider>
+      <QueryProvider>
+        <ThemeProvider defaultTheme={defaultTheme}>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </QueryProvider>
     </StoreProvider>
   );
 }

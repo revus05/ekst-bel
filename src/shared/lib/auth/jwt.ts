@@ -1,3 +1,4 @@
+import type { UserRole } from "entities/user/model/types";
 import "server-only";
 
 import { jwtVerify, SignJWT } from "jose";
@@ -8,6 +9,7 @@ type AuthTokenPayload = {
   sub: string;
   email: string;
   name: string;
+  role: UserRole;
 };
 
 const jwtSecret = new TextEncoder().encode(env.JWT_SECRET);
@@ -16,6 +18,7 @@ async function signAuthToken(payload: AuthTokenPayload) {
   return new SignJWT({
     email: payload.email,
     name: payload.name,
+    role: payload.role,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.sub)
@@ -35,7 +38,8 @@ async function verifyAuthToken(
     if (
       typeof payload.sub !== "string" ||
       typeof payload.email !== "string" ||
-      typeof payload.name !== "string"
+      typeof payload.name !== "string" ||
+      (payload.role !== "ADMIN" && payload.role !== "USER")
     ) {
       return null;
     }
@@ -44,6 +48,7 @@ async function verifyAuthToken(
       sub: payload.sub,
       email: payload.email,
       name: payload.name,
+      role: payload.role,
     };
   } catch {
     return null;
