@@ -221,7 +221,7 @@ function Header({ className }: HeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-border/70 bg-background/55 backdrop-blur-2xl supports-backdrop-filter:bg-background/45",
+        "sticky top-0 z-40 border-b border-sidebar-border bg-background/55 backdrop-blur-2xl supports-backdrop-filter:bg-background/45",
         className,
       )}
     >
@@ -238,7 +238,8 @@ function Header({ className }: HeaderProps) {
         <div className="flex items-center gap-3">
           {user ? (
             <div className="relative hidden sm:block">
-              <button
+              <Button
+                variant="outline"
                 ref={userMenuTriggerRef}
                 type="button"
                 aria-expanded={isUserMenuOpen}
@@ -258,7 +259,7 @@ function Header({ className }: HeaderProps) {
                     isUserMenuOpen && "rotate-180",
                   )}
                 />
-              </button>
+              </Button>
 
               {isUserMenuOpen ? (
                 <div

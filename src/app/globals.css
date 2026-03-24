@@ -118,7 +118,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-sidebar-border outline-ring/50;
   }
   :where(html, body) {
     min-height: 100%;
