@@ -99,15 +99,19 @@ function Header({ className }: HeaderProps) {
       <Button variant="ghost" asChild>
         <Link href="/">{text.home}</Link>
       </Button>
+      {user ? (
+        <Button variant="ghost" asChild>
+          <Link
+            href={user.role === "ADMIN" ? "/admin/feedback" : "/feedback"}
+          >
+            {text.feedback}
+          </Link>
+        </Button>
+      ) : null}
       {user?.role === "ADMIN" ? (
-        <>
-          <Button variant="ghost" asChild>
-            <Link href="/admin/feedback">{text.feedback}</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/admin/products/new">{text.addProduct}</Link>
-          </Button>
-        </>
+        <Button variant="ghost" asChild>
+          <Link href="/admin/products/new">{text.addProduct}</Link>
+        </Button>
       ) : null}
     </>
   );

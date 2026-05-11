@@ -48,6 +48,7 @@
 }
 
 :root {
+  --header-height: 79px;
   --background: oklch(0.985 0.004 240);
   --foreground: oklch(0.2 0.02 255);
   --card: oklch(1 0.004 240 / 78%);

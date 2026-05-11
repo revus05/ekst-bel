@@ -1,5 +1,6 @@
 import type { Product } from "entities/product/model/types";
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   Card,
@@ -13,11 +14,12 @@ import {
 type ProductCardProps = {
   product: Product;
   action?: ReactNode;
+  href?: string;
 };
 
-function ProductCard({ product, action }: ProductCardProps) {
-  return (
-    <Card className="h-full overflow-hidden pt-0">
+function ProductCard({ product, action, href }: ProductCardProps) {
+  const body = (
+    <>
       {product.imageUrl ? (
         <div className="bg-muted/30 relative aspect-video overflow-hidden border-b border-white/10">
           <Image
@@ -29,12 +31,24 @@ function ProductCard({ product, action }: ProductCardProps) {
           />
         </div>
       ) : null}
-      <CardHeader className="space-y-3">
+      <CardHeader className="space-y-3 pt-3">
         <CardTitle className="text-xl">{product.name}</CardTitle>
         <CardDescription className="text-sm leading-6 text-foreground/70 break-all line-clamp-3">
           {product.description}
         </CardDescription>
       </CardHeader>
+    </>
+  );
+
+  return (
+    <Card className="h-full overflow-hidden pt-0">
+      {href ? (
+        <Link href={href} className="block hover:opacity-90 transition-opacity">
+          {body}
+        </Link>
+      ) : (
+        body
+      )}
       {action ? (
         <CardFooter className="pt-0 mt-auto">{action}</CardFooter>
       ) : (

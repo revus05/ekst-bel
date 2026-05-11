@@ -17,19 +17,31 @@ const messages = {
       success: "Product added successfully.",
     },
     admin: {
+      cancelEdit: "Cancel",
+      deleteCancel: "Cancel",
+      deleteConfirm: "Delete this request?",
+      deleteConfirmDescription: "This action cannot be undone.",
+      deleteError: "Failed to delete.",
+      deleteFeedback: "Delete",
+      deleteSuccess: "Request deleted.",
+      editFeedback: "Edit",
       empty: "No requests yet",
       emptyDescription:
         "Requests will appear here once users start sending them.",
       feedbackDescription:
-        "Complete list of requests with author, product and current status.",
+        "Users' requests.",
+      feedbackSection: "Support System",
       feedbackTitle: "User Requests",
       newProductDescription:
         "Create a new company product and upload its cover to Cloudinary.",
       newProductInfo:
         "After creation, the product will immediately appear on the home page and become available for collecting feedback.",
       newProductTitle: "New Product",
+      saveChanges: "Save",
       section: "Admin",
       title: "Add Product",
+      updateError: "Failed to update.",
+      updateSuccess: "Updated.",
     },
     auth: {
       email: "Email",
@@ -82,7 +94,7 @@ const messages = {
     },
     feedbackStatus: {
       IN_PROGRESS: "In Progress",
-      OPEN: "Open",
+      OPEN: "Pending",
       RESOLVED: "Resolved",
     },
     feedbackType: {
@@ -110,13 +122,32 @@ const messages = {
       themeLight: "Light",
       userRoleHint: "Tap to open settings",
     },
+    feedbackList: {
+      filterProjectAll: "All projects",
+      filterProjectLabel: "Project",
+      filterTypeAll: "All types",
+      filterTypeLabel: "Type",
+      noResults: "No requests match the current filters.",
+      searchLabel: "Search",
+      searchPlaceholder: "Search by title or description",
+      sortLabel: "Sort by date",
+      sortNewest: "Newest first",
+      sortOldest: "Oldest first",
+      tabAll: "All",
+    },
     home: {
       description:
         "Choose a company product and send a bug report, issue description, odd behavior report or an improvement suggestion.",
-      greeting: "Hello",
       productsDescription:
         "Choose a product to leave feedback, report a bug or suggest an improvement.",
       productsTitle: "Company Products",
+      title: "Support Portal",
+    },
+    myFeedback: {
+      description: "All requests sent for company products.",
+      empty: "No requests yet.",
+      section: "Support",
+      title: "All Requests",
     },
     localeTag: "en-US",
     productList: {
@@ -154,7 +185,10 @@ const messages = {
       imageTooLarge: "Image size must not exceed 5 MB.",
       internalAddProduct:
         "Failed to add the product. Check Cloudinary and try again.",
+      feedbackNotFound: "Feedback not found.",
+      internalDeleteFeedback: "Failed to delete feedback.",
       internalFeedback: "Failed to send feedback. Please try again.",
+      internalUpdateFeedback: "Failed to update feedback.",
       internalGetProducts: "Failed to get product list. Please try again.",
       internalLogin: "Failed to sign in. Please try again.",
       internalMe: "Failed to get current user.",
@@ -201,19 +235,31 @@ const messages = {
       success: "Продукт успешно добавлен.",
     },
     admin: {
+      cancelEdit: "Отмена",
+      deleteCancel: "Отмена",
+      deleteConfirm: "Удалить обращение?",
+      deleteConfirmDescription: "Это действие нельзя отменить.",
+      deleteError: "Не удалось удалить.",
+      deleteFeedback: "Удалить",
+      deleteSuccess: "Обращение удалено.",
+      editFeedback: "Редактировать",
       empty: "Обращений пока нет",
       emptyDescription:
         "Когда пользователи начнут оставлять обращения, они появятся здесь.",
       feedbackDescription:
-        "Полный список обращений с автором, продуктом и текущим статусом.",
+        "Обращения пользователей",
+      feedbackSection: "Система поддержки",
       feedbackTitle: "Обращения пользователей",
       newProductDescription:
         "Создайте новый продукт компании и загрузите его обложку в Cloudinary.",
       newProductInfo:
         "После создания продукт сразу появится на главной странице и станет доступен для сбора обратной связи.",
       newProductTitle: "Новый продукт",
+      saveChanges: "Сохранить",
       section: "Админка",
       title: "Добавление продукта",
+      updateError: "Не удалось обновить.",
+      updateSuccess: "Обновлено.",
     },
     auth: {
       email: "Email",
@@ -266,8 +312,8 @@ const messages = {
     },
     feedbackStatus: {
       IN_PROGRESS: "В работе",
-      OPEN: "Открыто",
-      RESOLVED: "Решено",
+      OPEN: "В обработке",
+      RESOLVED: "Выполнено",
     },
     feedbackType: {
       BUG: "Баг",
@@ -294,13 +340,32 @@ const messages = {
       themeLight: "Светлая",
       userRoleHint: "Нажмите для настроек",
     },
+    feedbackList: {
+      filterProjectAll: "Все проекты",
+      filterProjectLabel: "Проект",
+      filterTypeAll: "Все типы",
+      filterTypeLabel: "Тип",
+      noResults: "По текущим фильтрам обращения не найдены.",
+      searchLabel: "Поиск",
+      searchPlaceholder: "Найдите обращение",
+      sortLabel: "Сортировка по дате",
+      sortNewest: "Сначала новые",
+      sortOldest: "Сначала старые",
+      tabAll: "Все",
+    },
     home: {
       description:
         "Выберите продукт компании и отправьте баг-репорт, описание ошибки, сообщение о нелогичном поведении или предложение по улучшению.",
-      greeting: "Здравствуйте",
       productsDescription:
         "Выберите продукт, по которому хотите оставить отзыв, сообщить о баге или предложить улучшение.",
       productsTitle: "Продукты компании",
+      title: "Портал поддержки",
+    },
+    myFeedback: {
+      description: "Все обращения, отправленные по продуктам компании.",
+      empty: "Обращений пока нет.",
+      section: "Поддержка",
+      title: "Все обращения",
     },
     localeTag: "ru-RU",
     productList: {
@@ -309,7 +374,7 @@ const messages = {
       loadError: "Не удалось загрузить продукты.",
       retry: "Повторить",
       searchLabel: "Поиск",
-      searchPlaceholder: "Найдите продукт по названию или описанию",
+      searchPlaceholder: "Найдите продукт",
       sortAsc: "По алфавиту",
       sortDesc: "В обратном порядке",
       sortLabel: "Сортировка",
@@ -338,7 +403,10 @@ const messages = {
       imageTooLarge: "Изображение не должно превышать 5 MB.",
       internalAddProduct:
         "Не удалось добавить продукт. Проверьте Cloudinary и повторите попытку.",
+      feedbackNotFound: "Обращение не найдено.",
+      internalDeleteFeedback: "Не удалось удалить обращение.",
       internalFeedback: "Не удалось отправить отзыв. Попробуйте еще раз.",
+      internalUpdateFeedback: "Не удалось обновить обращение.",
       internalGetProducts:
         "Не удалось получить список продуктов. Попробуйте еще раз.",
       internalLogin: "Не удалось выполнить вход. Попробуйте еще раз.",

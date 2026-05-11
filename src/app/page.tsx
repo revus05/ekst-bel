@@ -15,7 +15,7 @@ async function Page() {
     <div className="min-h-svh">
       <Header />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10">
-        <HeroSection currentUser={currentUser} />
+        <HeroSection />
         <ProductList />
       </main>
     </div>

@@ -43,7 +43,7 @@ async function NewProductPage() {
           </p>
         </section>
 
-        <Card className="max-w-3xl justify-center">
+        <Card className="mx-auto max-w-3xl w-full">
           <CardHeader>
             <CardTitle>{t.admin.newProductTitle}</CardTitle>
             <CardDescription>{t.admin.newProductInfo}</CardDescription>

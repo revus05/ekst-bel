@@ -51,14 +51,14 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
     () => (error ? normalizeApiError(error, t.productList.loadError) : null),
     [error, t.productList.loadError],
   );
-  const isProductsLoaded = products.length > 0;
+  const isProductsLoaded = initialProductId ? true : products.length > 0;
 
   function clearApiFieldErrors() {
     for (const fieldName of fields) {
       form.setFieldMeta(fieldName, (previousMeta) => ({
-        ...previousMeta,
+        ...(previousMeta ?? {}),
         errorMap: {
-          ...previousMeta.errorMap,
+          ...(previousMeta?.errorMap ?? {}),
           onSubmit: undefined,
         },
       }));
@@ -109,9 +109,9 @@ function FeedbackForm({ initialProductId }: FeedbackFormProps) {
           }
 
           formApi.setFieldMeta(fieldName, (previousMeta) => ({
-            ...previousMeta,
+            ...(previousMeta ?? {}),
             errorMap: {
-              ...previousMeta.errorMap,
+              ...(previousMeta?.errorMap ?? {}),
               onSubmit: fieldError,
             },
           }));
